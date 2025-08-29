@@ -1,0 +1,43 @@
+using Core.Fsm;
+
+namespace Scenes.Scripts.Fsm.State.MenuState
+{
+    public class MetaFlowBuilder
+    {
+        private readonly MenuScreen _menuScreen;
+        private readonly ShopScreen _shopScreen;
+        private readonly BattlePassScreen _battlePassScreen;
+        private FsmController _fsmController;
+
+
+        public MetaFlowBuilder(MenuScreen menuScreen, ShopScreen shopScreen, BattlePassScreen battlePassScreen)
+        {
+            _menuScreen = menuScreen;
+            _shopScreen = shopScreen;
+            _battlePassScreen = battlePassScreen;
+            _fsmController = new FsmController();
+        }
+
+        public void Initialize()
+        {
+            var menuState = new MenuState(_menuScreen);
+            var shopState = new ShopState(_shopScreen);
+            var battlePassState = new BattlePassState(_battlePassScreen);
+
+            menuState.AddTransition(shopState, () => menuState.TargetId == "Shop");
+            menuState.AddTransition(battlePassState, () => menuState.TargetId == "BattlePass");
+            shopState.AddTransition(menuState);
+            battlePassState.AddTransition(menuState);
+
+            _fsmController.AddState(menuState);
+            _fsmController.AddState(shopState);
+            _fsmController.AddState(battlePassState);
+            _fsmController.Initialize();
+        }
+
+        public void Deinitialize()
+        {
+            _fsmController.Deinitialize();
+        }
+    }
+}
